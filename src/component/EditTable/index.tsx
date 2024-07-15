@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from "react-native";
 import { useGlobalContext } from "../../context/GlobalContext";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { FORM } from "../../constant/actionTypes/ReducerStateType";
+import { UPDATE_DBTABLES } from "../../constant/actionTypes/ReducerActionType";
 
 
 const EditTable = ({ label, fieldName, value,handleSave }) => {
@@ -26,7 +28,7 @@ const EditTable = ({ label, fieldName, value,handleSave }) => {
                     <TextInput
                         onChangeText={(text) => {
                             setText(text);
-
+                            dispatchAction(FORM, UPDATE_DBTABLES, { fieldName: fieldName, value: text });
                         }}
                         style={styles.input}
                         autoFocus
@@ -50,8 +52,8 @@ const EditTable = ({ label, fieldName, value,handleSave }) => {
                 </View>
             ) : (
                 <View style={styles.item}>
-                    <Text style={styles.description}>{text}</Text>
-                    <Ionicons name="create-outline" size={15} color="white" onPress={handleEdit} />
+                    <Text ellipsizeMode="tail" numberOfLines={1} style={styles.description}>{text}</Text>
+                    <Ionicons name="create-outline" size={15} color="white" onPress={handleEdit} style={{position:'absolute',right:'3%'}}/>
 
                 </View>
             )}
@@ -78,8 +80,8 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0, 23, 31, 0.66)",
         alignItems: "center",
         borderRadius: 60,
-        padding: '1%',
-        paddingRight: '4%',
+        position: "relative",
+        paddingRight: 10,
 
     },
     input: {

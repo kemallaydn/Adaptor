@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import EditTable from '../component/EditTable';
 import Ionicons from "react-native-vector-icons/Ionicons";
+import FancyButton from '../component/Button';
+import { useGlobalContext } from '../context/GlobalContext';
+import AxiosInstance from './AxiosInstance';
+import { SET_TABLE_DATA, UPDATE_TABLE_DATA } from '../constant/actionTypes/ReducerActionType';
+import { FORM } from '../constant/actionTypes/ReducerStateType';
 
-let EditInstance;
+let EditInstance:any = null;
 
 const EditModal = () => {
+  const { state, dispatchAction } = useGlobalContext();
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [data, setData] = useState([]);
@@ -46,25 +52,40 @@ const EditModal = () => {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
+          <ScrollView showsVerticalScrollIndicator={false}>
           {
-            data.map((item, index) => (
-                <EditTable key={index}  fieldName={item} value={item}  />
+              Object.entries(data).map(([key,value], index) => (
+              <View key={index} style={{marginVertical:'2%'}}>
+                <EditTable key={index} fieldName={key} value={value} label={undefined} handleSave={()=>{
+                  console.log(state.form.selectionTableRow)
+                  AxiosInstance.put(`api/db/update?tableName=${state.form.selectionTable}&id=${state.form.selectionTableRow?.id}`, state.form.selectionTableRow).then(async res=>{
+                    console.log(res.data);
+                    await AxiosInstance.get("api/db/allDbTables?tableName=" + state.form.selectionTable)
+                    .then(async res => {
+                      console.log(res.data);
+                      
+                      dispatchAction(FORM, SET_TABLE_DATA, res.data);
+              
+                    })
+                    .catch(err => {
+                      console.log("Connection failed " + err);
+                    });
+                  })
+
+                  console.log("Save");
+                }}  />
+              </View>
             ))
           }
-          <Text style={styles.modalTitle}>{title}</Text>
-          <Text style={styles.modalText}>{message}</Text>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={handleClose}
-          >
-            <Text style={styles.closeButtonText}>Tamam</Text>
-          </TouchableOpacity>
+          </ScrollView>
+          <FancyButton title="Tamam" onPress={handleClose} />
+  
           {onCancel && (
               <TouchableOpacity
                 style={[styles.closeButton, { backgroundColor: '#e74c3c' }]}
                 onPress={handleCancel}
               >
-                <Text style={styles.closeButtonText}>İptal     </Text>
+                <Text style={styles.closeButtonText}>İptal </Text>
               </TouchableOpacity>
             )}
         </View>
@@ -79,12 +100,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+   
   },
   modalView: {
-    width: '60%',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    width: '80%',
+    backgroundColor: 'white',
     borderRadius: 10,
-    paddingVertical: 20,
+    padding: 20,
+    maxHeight: '75%',
+   
 
     shadowColor: '#000',
     shadowOffset: {

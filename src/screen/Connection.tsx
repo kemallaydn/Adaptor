@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Alert, Button, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useGlobalContext } from "../context/GlobalContext";
 import { FORM } from "../constant/actionTypes/ReducerStateType";
@@ -10,6 +10,12 @@ import AxiosInstance from "../Instance/AxiosInstance";
 
 const Connection = () => {
     const {state, dispatchAction} = useGlobalContext();
+
+    useEffect(()=>{
+        dispatchAction(FORM, SET_DBCONNECTION, {fieldName: "url", value: "jdbc:postgresql://localhost:5432/swapiffy"});
+        dispatchAction(FORM, SET_DBCONNECTION, {fieldName: "username", value: "Kemal"});
+        dispatchAction(FORM, SET_DBCONNECTION, {fieldName: "password", value: "1234"});
+    },[])
 
     const onConnect = async () => {
         await AxiosInstance.post("api/db/connect", state.form.dbConnection)

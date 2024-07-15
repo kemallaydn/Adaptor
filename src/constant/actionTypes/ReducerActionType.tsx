@@ -1,1 +1,7 @@
 export const SET_DBCONNECTION = 'SET_DBCONNECTION';
+export const UPDATE_DBTABLES = 'UPDATE_DBTABLES';
+export const SET_TABLE_DATA = 'SET_TABLE_DATA';
+export const UPDATE_TABLE_DATA = 'UPDATE_TABLE_DATA';
+export const SET_TABLE = 'SET_TABLE';
+export const SET_TABLE_ROW = 'SET_TABLE_ROW';
+export const CLEAR_FORM = 'CLEAR_FORM';

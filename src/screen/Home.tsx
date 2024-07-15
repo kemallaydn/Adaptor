@@ -4,8 +4,12 @@ import AxiosInstance from "../Instance/AxiosInstance";
 import { useEffect, useState } from "react";
 import Dropdown from "../component/DropDown";
 import { EditInstance } from "../Instance/EditInstance";
+import { useGlobalContext } from "../context/GlobalContext";
+import {  SET_TABLE, SET_TABLE_DATA, SET_TABLE_ROW } from "../constant/actionTypes/ReducerActionType";
+import { FORM } from "../constant/actionTypes/ReducerStateType";
 
 const Home = () => {
+  const { state, dispatchAction } = useGlobalContext();
   const [dbTables, setDbTables] = useState();
   const [category, setCategory] = useState();
   const [tableColumns, setTableColumns] = useState([]);
@@ -29,6 +33,7 @@ const Home = () => {
   }, [])
 
   const handleTableSelect = async (table) => {
+    dispatchAction(FORM, SET_TABLE, table);
     await AxiosInstance.get("api/db/getDynamicTables?tableName=" + table)
       .then(async res => {
         console.log(res.data);
@@ -44,6 +49,7 @@ const Home = () => {
       .then(async res => {
         console.log(res.data);
         setDbTables(res.data);
+        dispatchAction(FORM, SET_TABLE_DATA, res.data);
 
       })
       .catch(err => {
@@ -53,6 +59,14 @@ const Home = () => {
 
   }
 
+  const createJsonObject = (keys, values) => {
+    let jsonObject = {};
+    for (let i = 0; i < keys.length; i++) {
+      jsonObject[keys[i]] = values[i];
+    }
+    return jsonObject;
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       {tableColumns.map((column, index) => (
@@ -61,11 +75,23 @@ const Home = () => {
     </View>
   );
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.row} onPress={()=>{
+    <TouchableOpacity style={styles.row} onPress={() => {
       EditInstance.show(item)
-    }}>
-      {item.map(header => (
-        <Text numberOfLines={1} ellipsizeMode="tail"  key={header} style={styles.dataCell}>{header}</Text>
+      const a = createJsonObject(tableColumns, item)
+      EditInstance.show(a)
+      dispatchAction(FORM ,SET_TABLE_ROW,a)
+      console.log(a.id);
+      
+      }}>
+      {item.map((header, index) => (
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          key={index * new Date().getTime() - Math.random()} 
+          style={styles.dataCell}
+        >
+          {header}
+        </Text>
       ))}
     </TouchableOpacity>
   );
@@ -78,7 +104,7 @@ const Home = () => {
         <View>
           {renderHeader()}
           <FlatList
-            data={dbTables}
+            data={state.form.tableData}
             renderItem={renderItem}
             keyExtractor={(item, index) => index.toString()}
           />
@@ -128,7 +154,6 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
   },
   content: {
-
     padding: 20,
   },
 })
